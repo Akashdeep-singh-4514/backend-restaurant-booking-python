@@ -1,0 +1,26 @@
+poetry.lock
+# add all files that should be ignored by git
+*.pyc
+__pycache__/
+*.pyo
+*.pyd
+*.db
+*.sqlite3
+*.log
+*.env
+*.DS_Store
+*.egg-info/
+*.coverage
+*.mypy_cache/
+*.pytest_cache/
+*.vscode/
+.idea/
+*.ipynb_checkpoints
+*.egg
+*.swp
+*.bak
+*.tmp
+*.orig
+*.out
+
+*/logs/
