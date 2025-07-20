@@ -1,19 +1,18 @@
-from typing import List
-
 from passlib.context import CryptContext
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 
-from src.config import DatabaseConfig, logger
+from src.config import logger
 from src.models import User
-from src.schemas.user_schema import UserCreate, UserLogin, UserResponse, UserUpdate
+from src.schemas.user_schema import UserCreate, UserLogin, UserResponse
+from src.schemas.auth_schema import AuthResponse
 from src.validators import (
     CommonValidator,
     EmailValidator,
     PasswordValidator,
     SecurityValidator,
 )
-
+from src.utils.jwt_service import generate_jwt_token
 
 class AuthService:
     def __init__(self, db: AsyncSession):
@@ -30,7 +29,7 @@ class AuthService:
         """Verify password against hash."""
         return self.pwd_context.verify(plain_password, hashed_password)
 
-    async def signup(self, user_data: UserCreate) -> UserResponse:
+    async def signup(self, user_data: UserCreate) -> AuthResponse:
         self.logger.info("AuthService: Creating a new user.")
         async with self.db as session:
             # Convert Pydantic model to dict
@@ -99,23 +98,29 @@ class AuthService:
             await session.commit()
             await session.refresh(new_user)
 
-            # Convert to UserResponse for proper serialization
-            return UserResponse.model_validate(new_user)
+            # Generate JWT token
+            token = generate_jwt_token(new_user.id, new_user.username, new_user.email)
 
-    async def signin(self, user_data: UserLogin) -> UserResponse:
+            # Convert to UserResponse for proper serialization
+            return AuthResponse(token=token, user=UserResponse.model_validate(new_user))
+
+    async def signin(self, user_data: UserLogin) -> AuthResponse:
         """Authenticate user by username/email and password."""
-        print("AuthService: Authenticating user.", user_data)
         user_dict = user_data.model_dump(exclude_unset=True)
         email = user_dict.get("email")
         password = user_dict.get("password")
         username = user_dict.get("username")
-        print(email, password, username)
 
         if not email and not username:
             raise ValueError("Email or username is required for login.")
         if not password:
             raise ValueError("Password is required for login.")
-
+        if not EmailValidator.is_valid_email(email):
+            raise ValueError("Invalid email format.")
+        
+        if not SecurityValidator.is_safe_username(username):
+            raise ValueError(f"Username validation failed")
+        
         async with self.db as session:
             if email:
                 result = await session.execute(select(User).where(User.email == email))
@@ -131,4 +136,7 @@ class AuthService:
             if not self.verify_password(password, user.hashed_password):
                 raise ValueError("Invalid credentials.")
 
-            return UserResponse.model_validate(user)
+            # Generate JWT token
+            token = generate_jwt_token(user.id, user.username, user.email)
+
+            return AuthResponse(token=token, user=UserResponse.model_validate(user))

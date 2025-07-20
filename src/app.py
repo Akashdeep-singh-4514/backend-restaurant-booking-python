@@ -1,4 +1,11 @@
-# src/app.py
+"""
+FILE OVERVIEW:
+   Purpose: Main FastAPI application with JWT authentication and middleware setup
+   Key Concepts: FastAPI App, JWT Security, CORS, Exception Handling
+   Module Type: Application
+   @ai_context: Central application configuration with authentication support
+"""
+
 import os
 from contextlib import asynccontextmanager
 
@@ -6,6 +13,7 @@ from fastapi import FastAPI, Request, status
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from fastapi.openapi.utils import get_openapi
 from pydantic import ValidationError
 
 from src.config import DatabaseConfig, logger
@@ -50,13 +58,52 @@ async def lifespan(app: FastAPI):
         logger.info("Application shutdown complete.")
 
 
+def custom_openapi():
+    """Custom OpenAPI schema with JWT security scheme"""
+    if app.openapi_schema:
+        return app.openapi_schema
+    
+    openapi_schema = get_openapi(
+        title="Restaurant Booking API",
+        version="1.0.0",
+        description="Professional FastAPI project for restaurant booking with JWT authentication.",
+        routes=app.routes,
+    )
+    
+    # Add JWT security scheme
+    openapi_schema["components"]["securitySchemes"] = {
+        "BearerAuth": {
+            "type": "http",
+            "scheme": "bearer",
+            "bearerFormat": "JWT",
+            "description": "Enter JWT token in the format: Bearer <token>"
+        }
+    }
+    
+    # Add global security requirement
+    openapi_schema["security"] = [
+        {
+            "BearerAuth": []
+        }
+    ]
+    
+    app.openapi_schema = openapi_schema
+    return app.openapi_schema
+
+
 # Initialize FastAPI application
 app = FastAPI(
-    title="Little Lemon API",
-    description="Professional FastAPI project for Little Lemon restaurant.",
-    version=os.getenv("__VERSION__", "0.1.0"),  # Can read from __init__.py or env
+    title="Restaurant Booking API",
+    description="Professional FastAPI project for restaurant booking with JWT authentication.",
+    version=os.getenv("__VERSION__", "1.0.0"),
     lifespan=lifespan,
+    openapi_url="/openapi.json",
+    docs_url="/docs",
+    redoc_url="/redoc",
 )
+
+# Set custom OpenAPI schema
+app.openapi = custom_openapi
 
 # CORS Middleware Configuration
 # IMPORTANT: In production, narrow down `allow_origins` to your specific frontend domains.
