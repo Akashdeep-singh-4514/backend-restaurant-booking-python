@@ -59,37 +59,28 @@ async def lifespan(app: FastAPI):
 
 
 def custom_openapi():
-    """Custom OpenAPI schema with JWT security scheme"""
     if app.openapi_schema:
         return app.openapi_schema
     
     openapi_schema = get_openapi(
-        title="Restaurant Booking API",
-        version="1.0.0",
-        description="Professional FastAPI project for restaurant booking with JWT authentication.",
+        title=app.title,
+        version=app.version,
+        description=app.description,
         routes=app.routes,
     )
     
-    # Add JWT security scheme
+    # This is what makes the "Authorize" button work
     openapi_schema["components"]["securitySchemes"] = {
         "BearerAuth": {
             "type": "http",
             "scheme": "bearer",
             "bearerFormat": "JWT",
-            "description": "Enter JWT token in the format: Bearer <token>"
+            "description": "Enter your JWT token"
         }
     }
     
-    # Add global security requirement
-    openapi_schema["security"] = [
-        {
-            "BearerAuth": []
-        }
-    ]
-    
     app.openapi_schema = openapi_schema
     return app.openapi_schema
-
 
 # Initialize FastAPI application
 app = FastAPI(

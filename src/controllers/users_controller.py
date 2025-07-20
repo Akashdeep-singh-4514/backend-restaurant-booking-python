@@ -2,13 +2,14 @@ USERS_ID_ROUTE = "/users/{id}"
 USERS_ROUTE = "/users"
 from typing import List
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Security
 from fastapi.responses import JSONResponse
 
 from src.config._database_config import DatabaseConfig
 from src.config._logger import logger
 from src.schemas.user_schema import UserCreate, UserResponse, UserUpdate
 from src.services.users_service import UserService
+from src.middlewares.jwt_auth import jwt_bearer
 
 
 class UsersController:
@@ -49,6 +50,15 @@ class UsersController:
             methods=["DELETE"],
             tags=["users"],
             response_model=None,
+        )
+        # Fixed: Added dependencies parameter with JWT authentication
+        self.router.add_api_route(
+            "/me",
+            self.get_current_user_profile,
+            methods=["GET"],
+            tags=["users"],
+            response_model=None,
+            dependencies=[Security(jwt_bearer)],  # This makes it show in Swagger
         )
 
     async def get_users(self, db=Depends(DatabaseConfig.get_db_session)):
@@ -209,3 +219,28 @@ class UsersController:
                     "data": None,
                 },
             )
+    async def get_current_user_profile(
+        self, 
+        current_user: dict = Security(jwt_bearer),  # Use Security instead of decorator
+        db=Depends(DatabaseConfig.get_db_session)
+    ):
+        """Get current user profile using JWT authentication."""
+        try:
+            user_service = UserService(db)
+            user = await user_service.get_user_by_id(current_user["id"])
+            return {
+                "data": user,
+                "message": "Current user profile fetched successfully.",
+                "status": True,
+            }
+        except Exception as e:
+            self.logger.error(f"Error fetching current user profile: {e}")
+            return JSONResponse(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                content={
+                    "message": "An unexpected error occurred while fetching the user profile.",
+                    "status": False,
+                    "data": None,
+                },
+            )
+        
