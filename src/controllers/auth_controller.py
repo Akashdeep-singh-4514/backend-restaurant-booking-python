@@ -4,7 +4,7 @@ from fastapi.responses import JSONResponse
 from src.config._database_config import DatabaseConfig
 from src.config._logger import logger
 from src.schemas.user_schema import UserCreate, UserLogin, UserResponse, UserUpdate
-from src.services.auth_service import AuthService
+from src.services import AuthService
 
 
 class AuthController:

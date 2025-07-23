@@ -7,7 +7,7 @@ from fastapi.responses import JSONResponse
 from src.config._database_config import DatabaseConfig
 from src.config._logger import logger
 from src.schemas.user_schema import UserCreate, UserUpdate
-from src.services.users_service import UserService
+from src.services import UserService
 from src.middlewares.jwt_auth import jwt_bearer
 
 
