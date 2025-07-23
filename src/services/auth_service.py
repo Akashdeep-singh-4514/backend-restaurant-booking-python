@@ -30,7 +30,6 @@ class AuthService:
         return self.pwd_context.verify(plain_password, hashed_password)
 
     async def signup(self, user_data: UserCreate) -> AuthResponse:
-        self.logger.info("AuthService: Creating a new user.")
         async with self.db as session:
             # Convert Pydantic model to dict
             user_dict = user_data.model_dump(exclude_unset=True)

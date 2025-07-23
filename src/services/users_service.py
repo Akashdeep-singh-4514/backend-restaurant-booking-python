@@ -34,7 +34,6 @@ class UserService:
     """Service for user-related operations."""
 
     async def get_users(self) -> List[UserResponse]:
-        self.logger.info("AuthService: Fetching all users.")
         async with self.db as session:
             result = await session.execute(select(User))
             users = result.scalars().all()
@@ -43,7 +42,6 @@ class UserService:
 
     async def get_user_by_id(self, user_id: int) -> UserResponse:
         """Fetch a user by ID."""
-        self.logger.info(f"AuthService: Fetching user with ID {user_id}.")
         async with self.db as session:
             result = await session.execute(select(User).where(User.id == user_id))
             user = result.scalars().first()
@@ -52,7 +50,6 @@ class UserService:
             return UserResponse.model_validate(user)
 
     async def create_user(self, user_data: UserCreate) -> UserResponse:
-        self.logger.info("AuthService: Creating a new user.")
         async with self.db as session:
             # Convert Pydantic model to dict
             user_dict = user_data.model_dump(exclude_unset=True)
@@ -125,7 +122,6 @@ class UserService:
 
     async def update_user(self, user_id: int, user_data: UserUpdate) -> UserResponse:
         """Update user details."""
-        self.logger.info(f"AuthService: Updating user with ID {user_id}.")
         async with self.db as session:
             result = await session.execute(select(User).where(User.id == user_id))
             user = result.scalars().first()
@@ -155,7 +151,6 @@ class UserService:
 
     async def delete_user(self, user_id: int) -> None:
         """Delete a user by ID."""
-        self.logger.info(f"AuthService: Deleting user with ID {user_id}.")
         async with self.db as session:
             result = await session.execute(select(User).where(User.id == user_id))
             user = result.scalars().first()
