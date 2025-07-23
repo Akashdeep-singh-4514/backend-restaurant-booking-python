@@ -1,13 +1,12 @@
 USERS_ID_ROUTE = "/users/{id}"
 USERS_ROUTE = "/users"
-from typing import List
 
-from fastapi import APIRouter, Depends, HTTPException, status, Security
+from fastapi import APIRouter, Depends, status, Security
 from fastapi.responses import JSONResponse
 
 from src.config._database_config import DatabaseConfig
 from src.config._logger import logger
-from src.schemas.user_schema import UserCreate, UserResponse, UserUpdate
+from src.schemas.user_schema import UserCreate, UserUpdate
 from src.services.users_service import UserService
 from src.middlewares.jwt_auth import jwt_bearer
 

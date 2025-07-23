@@ -1,10 +1,10 @@
 # src/models/user_model.py
 from datetime import datetime, timezone
 
-from sqlalchemy import Boolean, Column, DateTime, Integer, String
-from sqlalchemy.orm import Mapped, mapped_column  # For SQLAlchemy 2.0 type hinting
+from sqlalchemy import Boolean, DateTime, Integer, String
+from sqlalchemy.orm import Mapped, mapped_column
 
-from src.config._database_config import Base  # Import the declarative base
+from src.config._database_config import Base
 
 
 class User(Base):
@@ -12,9 +12,8 @@ class User(Base):
     SQLAlchemy model for the 'users' table.
     """
 
-    __tablename__ = "users"  # Name of the database table
+    __tablename__ = "users"
 
-    # Using Mapped and mapped_column for SQLAlchemy 2.0 style type hints
     id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
     username: Mapped[str] = mapped_column(
         String, unique=True, index=True, nullable=False
