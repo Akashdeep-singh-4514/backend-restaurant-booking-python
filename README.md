@@ -115,3 +115,5 @@ Or activate the Poetry shell first:
 poetry shell
 uvicorn src.app:app --reload
 ```
+
+docker compose up -d --build

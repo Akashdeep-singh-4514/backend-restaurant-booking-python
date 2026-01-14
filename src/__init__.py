@@ -20,10 +20,6 @@ if not os.getenv("CORS_ALLOW_ORIGINS"):
         "CORS_ALLOW_ORIGINS environment not set. Defaulting to localhost in app.py."
     )
 
-if not os.getenv("SQLALCHEMY_DATABASE_URI"):
-    raise ValueError(
-        "SQLALCHEMY_DATABASE_URI environment not set. Please check your .env file or environment."
-    )
 
 __all__ = ["app"]  # Only expose 'app' as the main entry point from 'src'
 __version__ = "0.1.0"

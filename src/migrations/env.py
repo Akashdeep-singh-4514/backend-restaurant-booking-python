@@ -13,15 +13,17 @@ load_dotenv()
 
 # Import your models for target_metadata
 from src.models import Base
+# Import DatabaseConfig to use the same URL construction logic
+from src.config._database_config import DatabaseConfig
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
 config = context.config
 
-# Set the sqlalchemy.url from environment variable
+# Set the sqlalchemy.url using the same logic as the main app
 config.set_main_option(
     "sqlalchemy.url",
-    os.getenv("SQLALCHEMY_DATABASE_URI", "sqlite+aiosqlite:///./little_lemon.db"),
+    DatabaseConfig.get_db_url(),
 )
 
 # Interpret the config file for Python logging.
