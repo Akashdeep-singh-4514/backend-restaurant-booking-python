@@ -26,7 +26,7 @@ services:
       - DB_HOST=db
       - DOCKER_RUNNING=true
     ports:
-      - "8000:8000"
+      - "8001:8001"
     depends_on:
       db:
         condition: service_healthy
