@@ -83,14 +83,18 @@ def custom_openapi():
     return app.openapi_schema
 
 # Initialize FastAPI application
+# Show Swagger/OpenAPI docs only in development environment
+python_env = os.getenv("PYTHON_ENV", "development")
+is_development = python_env.lower() == "development"
+
 app = FastAPI(
     title="Restaurant Booking API",
     description="Professional FastAPI project for restaurant booking with JWT authentication.",
     version=os.getenv("__VERSION__", "1.0.0"),
     lifespan=lifespan,
-    openapi_url="/openapi.json",
-    docs_url="/docs",
-    redoc_url="/redoc",
+    openapi_url="/openapi.json" if is_development else None,
+    docs_url="/docs" if is_development else None,
+    redoc_url="/redoc" if is_development else None,
 )
 
 # Set custom OpenAPI schema
