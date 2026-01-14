@@ -24,8 +24,6 @@ RUN poetry install --no-root --without dev
 # Copy application code
 COPY . .
 
-# Expose port
-EXPOSE 8000
 
 # Copy and set permissions for entrypoint script
 COPY entrypoint.sh /entrypoint.sh
